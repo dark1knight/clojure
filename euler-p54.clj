@@ -44,10 +44,44 @@
 (defn readlines []
   (line-seq (java.io.BufferedReader. *in*)))
 
+;; there must be an easier way to do this...
 (defn check-straight [hand]
-  (map :number hand)
+  (let [numbers (map :number hand)]
+    (loop [this-number (first numbers)
+           next-number (second numbers)
+           index 1
+           is-last (= (count numbers) index)]
+      (if is-last
+        true
+        (if-not (= 1 (- next-number this-number))
+          false
+          (recur (first (drop index numbers))
+                 (second (drop index numbers))
+                 (inc index)
+                 (= (count numbers) (inc index))))))))
 
 (defn check-flush [hand]
   (= 1 (-> (map :suit hand) distinct count)))
 
-(check-flush (:first-hand (parse-line "2C 3C 7C JC QC")))
+(defn figure-out-hand [hand]
+  (if (check-flush hand)
+    (if (check-straight hand)
+      (println "either straight flush or royal flush")
+      (if (check-full-house hand)
+        (println "full house")
+        (if (check-four-of-a-kind hand)
+          (println "four of a kind")
+          (println "flush"))))
+    (if (check-straight hand)
+      (println "got a straight")
+      (if (check-full-house hand)
+        (println "full house")
+        (if (check-four-of-a-kind hand)
+          (println "four of a kind")
+          ; can be three of a kind, two pairs, one pair or high card
+
+
+
+;(check-flush (:first-hand (parse-line "2C 3C 7C JC QC")))
+
+;(check-straight (:first-hand (parse-line "2C 3C 4C 5C 6C")))
